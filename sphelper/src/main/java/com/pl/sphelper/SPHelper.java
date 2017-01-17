@@ -5,18 +5,27 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static com.pl.sphelper.ConstantUtil.CONTENT_URI;
+import static com.pl.sphelper.ConstantUtil.CURSOR_COLUMN_NAME;
+import static com.pl.sphelper.ConstantUtil.CURSOR_COLUMN_TYPE;
+import static com.pl.sphelper.ConstantUtil.CURSOR_COLUMN_VALUE;
 import static com.pl.sphelper.ConstantUtil.NULL_STRING;
 import static com.pl.sphelper.ConstantUtil.SEPARATOR;
 import static com.pl.sphelper.ConstantUtil.TYPE_BOOLEAN;
+import static com.pl.sphelper.ConstantUtil.TYPE_CLEAN;
 import static com.pl.sphelper.ConstantUtil.TYPE_CONTAIN;
 import static com.pl.sphelper.ConstantUtil.TYPE_FLOAT;
+import static com.pl.sphelper.ConstantUtil.TYPE_GET_ALL;
 import static com.pl.sphelper.ConstantUtil.TYPE_INT;
 import static com.pl.sphelper.ConstantUtil.TYPE_LONG;
 import static com.pl.sphelper.ConstantUtil.TYPE_STRING;
@@ -165,10 +174,10 @@ public class SPHelper {
             return defaultValue;
         }
         String sub=rtn.substring(1,rtn.length()-1);
-        String[] spl=sub.split(",");
+        String[] spl=sub.split(", ");
         Set<String> returns=new HashSet<>();
         for (String t:spl){
-            returns.add(t.replace(COMMA_REPLACEMENT,","));
+            returns.add(t.replace(COMMA_REPLACEMENT,", "));
         }
         return returns;
     }
@@ -191,10 +200,59 @@ public class SPHelper {
         Uri uri = Uri.parse(CONTENT_URI + SEPARATOR + TYPE_LONG + SEPARATOR + name);
         cr.delete(uri, null, null);
     }
-//    public static void clear(){
-//        SharedPreferences sp=getSP();
-//        SharedPreferences.Editor editor=sp.edit();
-//        editor.clear();
-//        editor.commit();
-//    }
+
+    public static void clear(){
+        checkContext();
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.parse(CONTENT_URI + SEPARATOR + TYPE_CLEAN);
+        cr.getType(uri);
+    }
+
+    public static Map<String,?> getAll(){
+        checkContext();
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.parse(CONTENT_URI + SEPARATOR + TYPE_GET_ALL);
+        Cursor cursor=cr.query(uri,null,null,null,null);
+        HashMap resultMap=new HashMap();
+        if (cursor!=null && cursor.moveToFirst()){
+            int nameIndex=cursor.getColumnIndex(CURSOR_COLUMN_NAME);
+            int typeIndex=cursor.getColumnIndex(CURSOR_COLUMN_TYPE);
+            int valueIndex=cursor.getColumnIndex(CURSOR_COLUMN_VALUE);
+            do {
+                String key=cursor.getString(nameIndex);
+                String type=cursor.getString(typeIndex);
+                Object value = null;
+                if (type.equalsIgnoreCase(TYPE_STRING)) {
+                    value= cursor.getString(valueIndex);
+                    if (((String)value).contains(COMMA_REPLACEMENT)){
+                        String str= (String) value;
+                        if (str.matches("\\[.*\\]")){
+                            String sub=str.substring(1,str.length()-1);
+                            String[] spl=sub.split(", ");
+                            Set<String> returns=new HashSet<>();
+                            for (String t:spl){
+                                returns.add(t.replace(COMMA_REPLACEMENT,", "));
+                            }
+                            value=returns;
+                        }
+                    }
+                } else if (type.equalsIgnoreCase(TYPE_BOOLEAN)) {
+                    value= cursor.getString(valueIndex);
+                } else if (type.equalsIgnoreCase(TYPE_INT)) {
+                    value= cursor.getInt(valueIndex);
+                } else if (type.equalsIgnoreCase(TYPE_LONG)) {
+                    value= cursor.getLong(valueIndex);
+                } else if (type.equalsIgnoreCase(TYPE_FLOAT)) {
+                    value= cursor.getFloat(valueIndex);
+                } else if (type.equalsIgnoreCase(TYPE_STRING_SET)) {
+                    value= cursor.getString(valueIndex);
+                }
+                resultMap.put(key,value);
+            }
+            while (cursor.moveToNext());
+            cursor.close();
+        }
+        return resultMap;
+    }
+
 }

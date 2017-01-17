@@ -4,13 +4,17 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+
+import java.util.Map;
+import java.util.Set;
+
 import static com.pl.sphelper.ConstantUtil.*;
 
 
-public class GetAwayContentProvider extends ContentProvider{
-    private static UriMatcher matcher=new UriMatcher(UriMatcher.NO_MATCH);
+public class SPContentProvider extends ContentProvider{
 
     @Override
     public boolean onCreate() {
@@ -23,10 +27,35 @@ public class GetAwayContentProvider extends ContentProvider{
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         String[] path= uri.getPath().split(SEPARATOR);
         String type=path[1];
-        String key=path[2];
-//        Cursor cursor=new MatrixCursor(new String[]{DEFAULT_CURSOR_NAME});
-//        cursor.
-//        SPHelperImpl.get(key, type);
+        if (type.equals(TYPE_GET_ALL)){
+            Map<String, ?> all = SPHelperImpl.getAll(getContext());
+            if (all!=null) {
+                MatrixCursor cursor = new MatrixCursor(new String[]{CURSOR_COLUMN_NAME,CURSOR_COLUMN_TYPE,CURSOR_COLUMN_VALUE});
+                Set<String> keySet = all.keySet();
+                for (String key:keySet){
+                    Object[] rows=new Object[3];
+                    rows[0]=key;
+                    rows[2]=all.get(key);
+                    if (rows[2] instanceof Boolean) {
+                        rows[1]=TYPE_BOOLEAN;
+                    }else
+                    if (rows[2] instanceof String) {
+                        rows[1]=TYPE_STRING;
+                    }else
+                    if (rows[2] instanceof Integer) {
+                        rows[1]=TYPE_INT;
+                    }else
+                    if (rows[2] instanceof Long) {
+                        rows[1]=TYPE_LONG;
+                    }else
+                    if (rows[2] instanceof Float) {
+                        rows[1]=TYPE_FLOAT;
+                    }
+                    cursor.addRow(rows);
+                }
+                return cursor;
+            }
+        }
         return null;
     }
 
@@ -36,6 +65,10 @@ public class GetAwayContentProvider extends ContentProvider{
         // 用这个来取数值
         String[] path= uri.getPath().split(SEPARATOR);
         String type=path[1];
+        if (type.equals(TYPE_CLEAN)){
+            SPHelperImpl.clear(getContext());
+            return "";
+        }
         String key=path[2];
         if (type.equals(TYPE_CONTAIN)){
             return SPHelperImpl.contains(getContext(),key)+"";

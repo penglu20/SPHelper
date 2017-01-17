@@ -3,8 +3,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 version  = "0.6.3"
-def siteUrl = 'https://github.com/l465659833/WheelView'                        // #CONFIG# // project homepage
-def gitUrl = 'https://github.com/l465659833/WheelView.git'                     // #CONFIG# // project git
+def siteUrl = 'https://github.com/l465659833/SPHelper'                        // #CONFIG# // project homepage
+def gitUrl = 'https://github.com/l465659833/SPHelper.git'                     // #CONFIG# // project git
 group = "com.pl"
 
 android {
@@ -44,7 +44,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'WheelView'                                   // #CONFIG# // project title
+                name 'SPHelper'                                   // #CONFIG# // project title
                 url siteUrl
                 // Set your license
                 licenses {
@@ -107,7 +107,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "WheelView"                                                 // #CONFIG# project name in jcenter
+        name = "SPHelper"                                                 // #CONFIG# project name in jcenter
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
