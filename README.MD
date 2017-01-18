@@ -74,7 +74,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 			return mcr.writeToDiskResult;
 		}
 	}
-			
+
 	private void enqueueDiskWrite(final MemoryCommitResult mcr,
 								  final Runnable postWriteRunnable) {
 		final Runnable writeToDiskRunnable = new Runnable() {
@@ -138,14 +138,14 @@ SP中的方法有sava，get，remove，clean，getAll这几种。那么我们可
 ```
 public class SPHelper {
 	...
-	
+
     public static final String CONTENT="content://";
     public static final String AUTHORITY="com.pl.sphelper";
     public static final String SEPARATOR= "/";
     public static final String CONTENT_URI =CONTENT+AUTHORITY;
-    public static final String TYPE_INT="int";    
+    public static final String TYPE_INT="int";
 	public static final String NULL_STRING= "null";
-	
+
 	public static int getInt(String name, int defaultValue) {
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.parse(CONTENT_URI + SEPARATOR + TYPE_INT + SEPARATOR + name);
@@ -159,9 +159,9 @@ public class SPHelper {
 }
 
 public class SPContentProvider extends ContentProvider{
-	...	
+	...
     public static final String SEPARATOR= "/";
-	
+
 	public String getType(Uri uri) {
         // 用这个来取数值
         String[] path= uri.getPath().split(SEPARATOR);
@@ -173,10 +173,10 @@ public class SPContentProvider extends ContentProvider{
 }
 
 class SPHelperImpl {
-	...	
-	
+	...
+
     public static final String TYPE_INT="int";
-	
+
     static String get(Context context, String name, String type) {
         if (type.equalsIgnoreCase(TYPE_STRING)) {
 			return getString(context, name, null);
@@ -296,18 +296,18 @@ public class ExampleInstrumentedTest {
 
 当调用方和SPContentProvider在***相同***的进程中时，性能如下：
 
-|调用方式|第一次|第二次|第三次|第四次|第五次|
-| :--------: |: -----: | :----: | :----: | :----: | :----: |
-|SPHelper|966|903|944|987|951|
-|SharedPreferences|850|836|904|844|838|
-|性能差距|**0.14	**|**0.08**|**0.04**|**0.17**|**0.13**|
+ | 调用方式 | 第一次 | 第二次 | 第三次 | 第四次 | 第五次 |
+ |:--------:|:-----:|  :----:  |  :----:  |  :----:  |  :----:  |
+ | SPHelper | 966 | 903 | 944 | 987 | 951 |
+ | SharedPreferences | 850 | 836 | 904 | 844 | 838 |
+ | 性能差距 | **0.14	** | **0.08** | **0.04** | **0.17** | **0.13** |
 
 ***可见性能损失并不大，大概10%左右***。这是因为Binder的工作方式，当在两者同一个进程中是，只是相当于函数调用，不会引起太大的消耗，具体的可以阅读Binder源码。所以这10%的差距基本上都是由于对数据的包装和解包装所产生的。
 
 那么进程间通信的消耗到底有多大呢，下表是调用方和SPContentProvider在***不同***的进程中时的结果：
 
-|调用方式|第一次|第二次|第三次|第四次|第五次|
-| :--------: |: -----: | :----: | :----: | :----: | :----: |
+ | 调用方式|第一次|第二次|第三次|第四次|第五次|
+|:--------:|:-----:|:----:| :----: | :----: | :----: |
 |SPHelper|1374|1283|1366|1286|1296|
 |SharedPreferences|829|850|861|886|869|
 |性能差距|**0.66**|**0.51**|**0.59**|**0.45**|**0.49**|
@@ -315,6 +315,3 @@ public class ExampleInstrumentedTest {
 
 ######需要注意的是，如果SPContentProvider所在的进程只有这个ContentProvider而没有其他组件的话，第一次调用时才会启动进程，所以会耗费大约50ms以上的时间，而且调用完以后一段时间，这个进程就会自动消耗，所以使用的时候，最好把SPContentProvider放到最常用SP的进程中，这样才能保证性能消耗最小。
 
-
-###5.源码
-Github：[SPHelper](https://github.com/l465659833/SPHelper)
