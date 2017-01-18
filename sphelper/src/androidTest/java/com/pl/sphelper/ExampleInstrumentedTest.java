@@ -3,9 +3,12 @@ package com.pl.sphelper;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.widget.Toast;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -21,6 +24,12 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.pl.sphelper.test", appContext.getPackageName());
+        Random random=new Random();
+        long start=System.currentTimeMillis();
+        for (int i=0;i<10000;i++) {
+            SPHelper.save("key"+random.nextInt(200),i);
+        }
+        long end=System.currentTimeMillis();
+        Toast.makeText(appContext,"takes "+(end-start)+"millis",Toast.LENGTH_SHORT).show();;
     }
 }

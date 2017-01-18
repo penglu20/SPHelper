@@ -5,6 +5,7 @@
         <provider
             android:name=".SPContentProvider"
             android:authorities="com.pl.sphelper"
+            android:process=":sphelper"
             android:exported="false" />
     </application>
 
