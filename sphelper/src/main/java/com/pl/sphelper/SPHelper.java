@@ -205,7 +205,7 @@ public class SPHelper {
         checkContext();
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.parse(CONTENT_URI + SEPARATOR + TYPE_CLEAN);
-        cr.getType(uri);
+        cr.delete(uri,null,null);
     }
 
     public static Map<String,?> getAll(){

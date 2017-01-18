@@ -65,10 +65,6 @@ public class SPContentProvider extends ContentProvider{
         // 用这个来取数值
         String[] path= uri.getPath().split(SEPARATOR);
         String type=path[1];
-        if (type.equals(TYPE_CLEAN)){
-            SPHelperImpl.clear(getContext());
-            return "";
-        }
         String key=path[2];
         if (type.equals(TYPE_CONTAIN)){
             return SPHelperImpl.contains(getContext(),key)+"";
@@ -92,6 +88,10 @@ public class SPContentProvider extends ContentProvider{
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         String[] path= uri.getPath().split(SEPARATOR);
         String type=path[1];
+        if (type.equals(TYPE_CLEAN)){
+            SPHelperImpl.clear(getContext());
+            return 0;
+        }
         String key=path[2];
         if (SPHelperImpl.contains(getContext(),key)){
             SPHelperImpl.remove(getContext(),key);
